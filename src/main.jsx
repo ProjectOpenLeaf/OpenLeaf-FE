@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import keycloak from "./components/keycloak.js";
 import TokenManager from "./services/TokenManager.js";
-import axios from "axios";
+import userService from "./services/UserService.js";
 
 function startApp() {
   ReactDOM.createRoot(document.getElementById("root")).render(
@@ -13,27 +13,29 @@ function startApp() {
   );
 }
 
-function saveUser() {
-    return axios.get(`http://localhost:8081/api/users/hello`,{
-        withCredentials: true,
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        }
-    })
-}
-
-
-// Initialize Keycloak
+// Initialize Keycloak and register user
 keycloak.init({
   onLoad: "login-required",
-  checkLoginIframe: false, // prevents re-triggering login
-  pkceMethod: "S256",      // optional but recommended
-}).then((authenticated) => {
+  checkLoginIframe: false,
+  pkceMethod: "S256",
+}).then(async (authenticated) => {
   if (authenticated) {
-        TokenManager.setAccessToken(keycloak.token);
-        saveUser();
-    startApp(); // only render app once logged in
+    // Store token
+    TokenManager.setAccessToken(keycloak.token);
+    
+    // Register user in backend
+    try {
+      const userData = await userService.registerUser();
+      console.log("✅ User registered:", userData);
+    } catch (error) {
+      console.error("❌ Registration failed:", error);
+    }
+    
+    // Start app
+    startApp();
   } else {
-    keycloak.login(); // fallback, rarely used
+    keycloak.login();
   }
+}).catch((error) => {
+  console.error("❌ Keycloak initialization failed:", error);
 });
