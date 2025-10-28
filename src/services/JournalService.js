@@ -3,9 +3,6 @@ import keycloak from '../components/keycloak.js';
 
 const API_BASE_URL = 'http://localhost:8081/api/journals';
 
-/**
- * Create a new journal entry
- */
 export const createJournal = async (content) => {
   const response = await axios.post(
     `${API_BASE_URL}/create`,
@@ -35,9 +32,23 @@ export const getMyJournals = async () => {
   return response.data;
 };
 
+export const getJournalById = async (id) => {
+  const response = await axios.get(
+    `${API_BASE_URL}/${id}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${keycloak.token}`
+      }
+    }
+  );
+  
+  return response.data;
+};
+
 const journalService = {
   createJournal,
-  getMyJournals
+  getMyJournals,
+  getJournalById
 };
 
 export default journalService;
