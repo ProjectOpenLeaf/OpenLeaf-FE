@@ -10,6 +10,7 @@ import BookAppointment from "./pages/BookAppointment.jsx";
 import CreateAppointmentSlot from "./pages/CreateAppointmentSlot.jsx";
 import MyAppointments from "./pages/MyAppointments.jsx";
 import { isPatient, isTherapist } from "./utils/roleUtils.js";
+import DeleteAccount from "./pages/DeleteAccount.jsx";
 
 function PrivateRoute({ children, keycloak }) {
   return keycloak.authenticated ? children : <Navigate to="/" />;
@@ -148,6 +149,15 @@ export default function App({ keycloak }) {
             </RoleRoute>
           }
         />
+
+        <Route
+  path="/delete-account"
+  element={
+    <PrivateRoute keycloak={keycloak}>
+      <DeleteAccount keycloak={keycloak} />
+    </PrivateRoute>
+  }
+/>
 
         {/* Unauthorized Page */}
         <Route

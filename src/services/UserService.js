@@ -71,10 +71,22 @@ export const getTherapists = async () => {
   return response.data;
 };
 
+export const deleteUser = async (keycloakId, reason = 'User requested') => {
+  const response = await axios.delete(
+    `${API_BASE_URL}/${keycloakId}`,
+    {
+      params: { reason: reason },
+      headers: { 'Authorization': `Bearer ${keycloak.token}` }
+    }
+  );
+  return response.data;
+};
+
 const userService = {
   registerUser,
   getCurrentUser,
-  getTherapists
+  getTherapists,
+  deleteUser
 };
 
 export default userService;

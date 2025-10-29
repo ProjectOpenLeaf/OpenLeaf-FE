@@ -61,6 +61,12 @@ export default function Navigation({ keycloak }) {
               >
                 Therapists
               </button>
+                            <button 
+                className={`nav-link ${isActive('/delete-account') ? 'active' : ''}`}
+                onClick={() => navigate('/delete-account')}
+              >
+                DeleteAccount
+              </button>
             </div>
           )}
           {userIsTherapist && (
@@ -83,6 +89,12 @@ export default function Navigation({ keycloak }) {
               >
                 Create Slot
               </button>
+                                          <button 
+                className={`nav-link ${isActive('/delete-account') ? 'active' : ''}`}
+                onClick={() => navigate('/delete-account')}
+              >
+                DeleteAccount
+              </button>
             </div>
           )}
         </div>
@@ -95,6 +107,9 @@ export default function Navigation({ keycloak }) {
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
+          {/* <Link to="/delete-account" className="danger-link">
+  Delete Account
+</Link> */}
         </div>
       </div>
     </nav>
