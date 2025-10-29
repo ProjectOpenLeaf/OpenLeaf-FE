@@ -1,5 +1,12 @@
-.journal-list-container {
-  max-width: 1200px;
+/* Journal List Redesign - Black & Green Theme */
+
+.journal-list-redesign-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.journal-list-content {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -12,147 +19,228 @@
 }
 
 .journal-list-header h1 {
-  font-size: 2rem;
-  color: #2c3e50;
+  color: #ffffff;
+  font-size: 2.5rem;
   margin: 0;
+  font-weight: 700;
 }
 
-.create-btn {
-  background-color: #3498db;
-  color: white;
+.create-journal-btn {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+  color: #0a0a0a;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.create-btn:hover {
-  background-color: #2980b9;
+.create-journal-btn:hover {
+  background: linear-gradient(135deg, #00cc66 0%, #00aa55 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
 }
 
-.create-btn-large {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 1rem;
-}
-
-.create-btn-large:hover {
-  background-color: #2980b9;
-}
-
-.loading {
+/* Loading State */
+.loading-state {
   text-align: center;
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  padding: 3rem;
+  padding: 4rem 2rem;
+  color: #888888;
 }
 
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #2a2a2a;
+  border-top-color: #00ff88;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error Message */
 .error-message {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  color: #c33;
+  background: #2a0a0a;
+  border: 2px solid #ff4444;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: #ff6666;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .error-message button {
-  background-color: #c33;
+  background: #ff4444;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
+.error-message button:hover {
+  background: #cc0000;
+}
+
+/* Empty State */
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  color: #7f8c8d;
+  padding: 6rem 2rem;
+}
+
+.empty-state-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.3;
 }
 
 .empty-state h2 {
-  font-size: 1.8rem;
-  color: #34495e;
-  margin-bottom: 0.5rem;
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 
 .empty-state p {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
+  color: #888888;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
 }
 
+.empty-state-btn {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+  color: #0a0a0a;
+  border: none;
+  padding: 1.25rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.empty-state-btn:hover {
+  background: linear-gradient(135deg, #00cc66 0%, #00aa55 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+}
+
+/* Journals Grid */
 .journals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
-  margin-top: 2rem;
 }
 
 .journal-card {
-  background: white;
-  border: 1px solid #e1e8ed;
+  background: #1a1a1a;
+  border: 2px solid #2a2a2a;
   border-radius: 12px;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.journal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.journal-card:hover::before {
+  transform: scaleX(1);
 }
 
 .journal-card:hover {
+  background: #0f0f0f;
+  border-color: #00ff88;
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-color: #3498db;
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.15);
 }
 
 .journal-card-header {
   margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .journal-date {
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: #00ff88;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .journal-card-content {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .journal-card-content p {
-  color: #2c3e50;
-  line-height: 1.6;
+  color: #cccccc;
+  line-height: 1.7;
   margin: 0;
   font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .journal-card-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .read-more {
-  color: #3498db;
+  color: #00ff88;
   font-size: 0.9rem;
   font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-/* Responsive design */
+.journal-card:hover .read-more {
+  transform: translateX(4px);
+}
+
+.journal-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #666666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .journals-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .journal-list-container {
+  .journal-list-content {
     padding: 1rem;
   }
 
@@ -162,7 +250,30 @@
     gap: 1rem;
   }
 
+  .journal-list-header h1 {
+    font-size: 2rem;
+  }
+
+  .create-journal-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .journals-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .journal-list-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .empty-state h2 {
+    font-size: 1.5rem;
+  }
+
+  .journal-card {
+    padding: 1.25rem;
   }
 }
