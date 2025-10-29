@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { assignTherapist } from '../services/AssignmentService';
+import { assignTherapist, getPatientTherapist } from '../services/AssignmentService';
 import { getTherapists } from '../services/UserService';
 import { getUserId } from '../utils/roleUtils';
+import Navigation from '../components/Navigation';
 import '../css/FindTherapist.css';
 
 export default function FindTherapist({ keycloak }) {
@@ -10,22 +11,28 @@ export default function FindTherapist({ keycloak }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [connecting, setConnecting] = useState(null);
+  const [myTherapist, setMyTherapist] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadTherapists();
+    loadData();
   }, []);
 
-  const loadTherapists = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       
-      // Fetch all users from backend
-      const allUsers = await getTherapists();
+      // Check if patient already has a therapist
+      const patientId = getUserId(keycloak);
+      try {
+        const therapistData = await getPatientTherapist(patientId);
+        setMyTherapist(therapistData);
+      } catch (err) {
+        console.log('No therapist assigned yet');
+      }
       
-      // For now, we show all users
-      // In a real implementation, you'd filter by role on backend
-      // Or add a 'role' column to your database
+      // Load all therapists
+      const allUsers = await getTherapists();
       setTherapists(allUsers);
       
       setError(null);
@@ -47,7 +54,7 @@ export default function FindTherapist({ keycloak }) {
       await assignTherapist(patientId, therapistKeycloakId, 'Patient self-assigned');
       
       alert('Successfully connected with therapist!');
-      navigate('/dashboard');
+      navigate(`/book-appointment/${therapistKeycloakId}`);
       
     } catch (err) {
       console.error('Error connecting with therapist:', err);
@@ -62,72 +69,86 @@ export default function FindTherapist({ keycloak }) {
     }
   };
 
+  const handleBookAppointment = (therapistKeycloakId) => {
+    navigate(`/book-appointment/${therapistKeycloakId}`);
+  };
+
   if (loading) {
     return (
-      <div className="find-therapist-container">
-        <div className="loading">Loading therapists...</div>
-      </div>
+      <>
+        <Navigation keycloak={keycloak} />
+        <div className="find-therapist-container">
+          <div className="loading">Loading therapists...</div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="find-therapist-container">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1>Find Your Therapist</h1>
-        <p className="subtitle">Choose a therapist to start your journey</p>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          {error}
+    <>
+      <Navigation keycloak={keycloak} />
+      <div className="find-therapist-container">
+        <div className="find-therapist-header">
+          <h1>Find a Therapist</h1>
+          {myTherapist && (
+            <div className="current-therapist-notice">
+              ✓ You are currently connected with a therapist
+            </div>
+          )}
         </div>
-      )}
 
-      <div className="therapists-grid">
-        {therapists.map((therapist) => (
-          <div key={therapist.keycloakId} className="therapist-card">
-            <div className="therapist-avatar">
-              <span className="avatar-icon">👨‍⚕️</span>
-            </div>
-            
-            <div className="therapist-info">
-              <h3>{therapist.firstName} {therapist.lastName}</h3>
-              <p className="username">@{therapist.username}</p>
-              
-              <div className="therapist-details">
-                <div className="detail-item">
-                  <span className="detail-label">Email:</span>
-                  <span className="detail-value">{therapist.email}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Member since:</span>
-                  <span className="detail-value">
-                    {new Date(therapist.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </div>
+        {error && <div className="error-message">{error}</div>}
 
-            <button
-              className="connect-btn"
-              onClick={() => handleConnect(therapist.keycloakId)}
-              disabled={connecting === therapist.keycloakId}
-            >
-              {connecting === therapist.keycloakId ? 'Connecting...' : 'Connect with Therapist'}
-            </button>
+        {therapists.length === 0 ? (
+          <div className="no-therapists">
+            <p>No therapists available at this time.</p>
           </div>
-        ))}
-
-        {therapists.length === 0 && (
-          <div className="empty-state">
-            <h3>No Therapists Available</h3>
-            <p>Please check back later or contact support.</p>
+        ) : (
+          <div className="therapists-list">
+            {therapists.map((therapist) => {
+              const isMyTherapist = myTherapist?.therapistKeycloakId === therapist.keycloakId;
+              
+              return (
+                <div key={therapist.keycloakId} className="therapist-card">
+                  <div className="therapist-info">
+                    <div className="therapist-avatar">👨‍⚕️</div>
+                    <div className="therapist-details">
+                      <h3>{therapist.username}</h3>
+                      <p>{therapist.email}</p>
+                      {isMyTherapist && (
+                        <span className="my-therapist-badge">Your Therapist</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="therapist-actions">
+                    {isMyTherapist ? (
+                      <button
+                        className="book-button"
+                        onClick={() => handleBookAppointment(therapist.keycloakId)}
+                      >
+                        📅 Book Appointment
+                      </button>
+                    ) : myTherapist ? (
+                      <button className="connect-button" disabled>
+                        Already Assigned
+                      </button>
+                    ) : (
+                      <button
+                        className="connect-button"
+                        onClick={() => handleConnect(therapist.keycloakId)}
+                        disabled={connecting !== null}
+                      >
+                        {connecting === therapist.keycloakId ? 'Connecting...' : 'Connect'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

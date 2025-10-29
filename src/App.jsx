@@ -6,7 +6,10 @@ import CreateJournal from "./pages/CreateJournal.jsx";
 import ViewJournal from "./pages/ViewJournal.jsx";
 import FindTherapist from "./pages/FindTherapist.jsx";
 import TherapistDashboard from "./pages/TherapistDashboard.jsx";
-import { isPatient, isTherapist, isAdmin } from "./utils/roleUtils.js";
+import BookAppointment from "./pages/BookAppointment.jsx";
+import CreateAppointmentSlot from "./pages/CreateAppointmentSlot.jsx";
+import MyAppointments from "./pages/MyAppointments.jsx";
+import { isPatient, isTherapist } from "./utils/roleUtils.js";
 
 function PrivateRoute({ children, keycloak }) {
   return keycloak.authenticated ? children : <Navigate to="/" />;
@@ -20,7 +23,6 @@ function RoleRoute({ children, keycloak, allowedRoles }) {
   const hasAccess = allowedRoles.some(role => {
     if (role === 'patient') return isPatient(keycloak);
     if (role === 'therapist') return isTherapist(keycloak);
-    if (role === 'admin') return isAdmin(keycloak);
     return false;
   });
 
@@ -45,7 +47,6 @@ export default function App({ keycloak }) {
 
   // Redirect to appropriate dashboard based on role
   const getDefaultRoute = () => {
-    if (isAdmin(keycloak)) return "/admin";
     if (isTherapist(keycloak)) return "/therapist/dashboard";
     if (isPatient(keycloak)) return "/dashboard";
     return "/dashboard";
@@ -106,6 +107,34 @@ export default function App({ keycloak }) {
           element={
             <RoleRoute keycloak={keycloak} allowedRoles={['patient']}>
               <FindTherapist keycloak={keycloak} />
+            </RoleRoute>
+          }
+        />
+
+        {/* Scheduling Routes - Both Patients and Therapists */}
+        <Route
+          path="/my-appointments"
+          element={
+            <PrivateRoute keycloak={keycloak}>
+              <MyAppointments keycloak={keycloak} />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/book-appointment/:therapistId"
+          element={
+            <RoleRoute keycloak={keycloak} allowedRoles={['patient']}>
+              <BookAppointment keycloak={keycloak} />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/create-appointment-slot"
+          element={
+            <RoleRoute keycloak={keycloak} allowedRoles={['therapist']}>
+              <CreateAppointmentSlot keycloak={keycloak} />
             </RoleRoute>
           }
         />

@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getPatientTherapist } from '../services/AssignmentService';
+import { getUserId } from '../utils/roleUtils';
 import '../css/Dashboard.css';
 
 export default function Dashboard({ keycloak }) {
   const navigate = useNavigate();
+  const [therapist, setTherapist] = useState(null);
+  const [loadingTherapist, setLoadingTherapist] = useState(true);
+
+  useEffect(() => {
+    checkTherapistAssignment();
+  }, []);
+
+  const checkTherapistAssignment = async () => {
+    try {
+      const patientId = getUserId(keycloak);
+      const therapistData = await getPatientTherapist(patientId);
+      setTherapist(therapistData);
+    } catch (err) {
+      console.log('No therapist assigned yet');
+      setTherapist(null);
+    } finally {
+      setLoadingTherapist(false);
+    }
+  };
 
   const handleLogout = () => {
     keycloak.logout();
@@ -39,12 +60,32 @@ export default function Dashboard({ keycloak }) {
             <button className="card-button">Create Entry →</button>
           </div>
 
-          <div className="dashboard-card" onClick={() => navigate('/find-therapist')}>
-            <div className="card-icon">👨‍⚕️</div>
-            <h3>Find Therapist</h3>
-            <p>Connect with a therapist</p>
-            <button className="card-button">Find Therapist →</button>
-          </div>
+          {!loadingTherapist && !therapist && (
+            <div className="dashboard-card" onClick={() => navigate('/find-therapist')}>
+              <div className="card-icon">👨‍⚕️</div>
+              <h3>Find Therapist</h3>
+              <p>Connect with a therapist</p>
+              <button className="card-button">Find Therapist →</button>
+            </div>
+          )}
+
+          {!loadingTherapist && therapist && (
+            <>
+              <div className="dashboard-card" onClick={() => navigate(`/book-appointment/${therapist.therapistKeycloakId}`)}>
+                <div className="card-icon">📅</div>
+                <h3>Book Appointment</h3>
+                <p>Schedule a session with your therapist</p>
+                <button className="card-button">Book Now →</button>
+              </div>
+
+              <div className="dashboard-card" onClick={() => navigate('/my-appointments')}>
+                <div className="card-icon">🗓️</div>
+                <h3>My Appointments</h3>
+                <p>View and manage your appointments</p>
+                <button className="card-button">View Appointments →</button>
+              </div>
+            </>
+          )}
 
           <div className="dashboard-card coming-soon">
             <div className="card-icon">📊</div>

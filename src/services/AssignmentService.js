@@ -76,11 +76,25 @@ export const unassignTherapist = async (assignmentId) => {
   return response.data;
 };
 
+export const getPatientTherapist = async (patientKeycloakId) => {
+  const response = await axios.get(
+    `${API_BASE_URL}/patient/${patientKeycloakId}/therapist`,
+    {
+      headers: {
+        'Authorization': `Bearer ${keycloak.token}`
+      }
+    }
+  );
+  
+  return response.data;
+};
+
 const assignmentService = {
   assignTherapist,
   getTherapistPatients,
   checkAuthorization,
-  unassignTherapist
+  unassignTherapist,
+  getPatientTherapist
 };
 
 export default assignmentService;

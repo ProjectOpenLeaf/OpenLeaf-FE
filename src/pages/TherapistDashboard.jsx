@@ -143,24 +143,33 @@ export default function TherapistDashboard({ keycloak }) {
 
         <div className="quick-actions">
           <h2>Quick Actions</h2>
-          <div className="actions-grid">
-            <button className="action-card" disabled>
-              <span className="action-icon">📝</span>
-              <span>Review Journals</span>
-            </button>
-            <button className="action-card" disabled>
-              <span className="action-icon">💭</span>
-              <span>Leave Comments</span>
-            </button>
-            <button className="action-card" disabled>
-              <span className="action-icon">💬</span>
-              <span>Send Message</span>
-            </button>
-            <button className="action-card" disabled>
-              <span className="action-icon">📊</span>
-              <span>View Insights</span>
-            </button>
-          </div>
+<div className="actions-grid">
+  <button 
+    className="action-card"
+    onClick={() => navigate('/create-appointment-slot')}
+  >
+    <span className="action-icon">📅</span>
+    <span>Create Appointment</span>
+  </button>
+  
+  <button 
+    className="action-card"
+    onClick={() => navigate('/my-appointments')}
+  >
+    <span className="action-icon">🗓️</span>
+    <span>My Appointments</span>
+  </button>
+  
+  <button className="action-card" disabled>
+    <span className="action-icon">📝</span>
+    <span>Review Journals</span>
+  </button>
+  
+  <button className="action-card" disabled>
+    <span className="action-icon">💬</span>
+    <span>Send Message</span>
+  </button>
+</div>
           <p className="coming-soon-note">
             These features are coming soon!
           </p>
