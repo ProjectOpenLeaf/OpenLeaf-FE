@@ -1,42 +1,13 @@
-// Custom commands for authentication and common operations
+// ***********************************************
+// This file is processed and loaded automatically before test files.
+// You can change the location of this file or turn off processing it by
+// modifying the `supportFile` config option.
+// ***********************************************
 
-// Mock Keycloak authentication
-Cypress.Commands.add('mockKeycloakAuth', (role = 'PATIENT') => {
-  cy.window().then((win) => {
-    // Mock Keycloak instance
-    win.keycloak = {
-      authenticated: true,
-      token: 'mock-token-' + Date.now(),
-      tokenParsed: {
-        sub: role === 'PATIENT' ? 'patient-kc-123' : 'therapist-kc-123',
-        preferred_username: role === 'PATIENT' ? 'john.doe' : 'dr.smith',
-        email: role === 'PATIENT' ? 'patient@test.com' : 'therapist@test.com',
-        given_name: role === 'PATIENT' ? 'John' : 'Dr. Sarah',
-        family_name: role === 'PATIENT' ? 'Doe' : 'Smith',
-        realm_access: {
-          roles: [role.toLowerCase()]
-        }
-      },
-      realmAccess: {
-        roles: [role.toLowerCase()]
-      },
-      hasRealmRole: (roleName) => {
-        return roleName.toLowerCase() === role.toLowerCase();
-      },
-      logout: cy.stub().as('keycloakLogout'),
-      updateToken: cy.stub().resolves(true),
-      loadUserProfile: cy.stub().resolves({
-        username: role === 'PATIENT' ? 'john.doe' : 'dr.smith',
-        email: role === 'PATIENT' ? 'patient@test.com' : 'therapist@test.com'
-      })
-    };
+// Import keycloak mocking utilities
+import './keycloak-mock';
 
-    // Store token in localStorage (if your app uses it)
-    win.localStorage.setItem('kc_token', win.keycloak.token);
-    win.localStorage.setItem('kc_authenticated', 'true');
-  });
-});
-
+// Custom command to login as patient
 Cypress.Commands.add('loginAsPatient', () => {
   cy.intercept('GET', '**/api/user-profiles/me', {
     statusCode: 200,
@@ -50,10 +21,12 @@ Cypress.Commands.add('loginAsPatient', () => {
     }
   }).as('getProfile');
 
+  cy.setupKeycloakMock('patient');
   cy.visit('/dashboard');
   cy.wait('@getProfile');
 });
 
+// Custom command to login as therapist
 Cypress.Commands.add('loginAsTherapist', () => {
   cy.intercept('GET', '**/api/user-profiles/me', {
     statusCode: 200,
@@ -67,10 +40,12 @@ Cypress.Commands.add('loginAsTherapist', () => {
     }
   }).as('getProfile');
 
+  cy.setupKeycloakMock('therapist');
   cy.visit('/therapist/dashboard');
   cy.wait('@getProfile');
 });
 
+// Custom command to mock journals
 Cypress.Commands.add('mockJournals', (journals = []) => {
   const defaultJournals = [
     {
@@ -95,25 +70,26 @@ Cypress.Commands.add('mockJournals', (journals = []) => {
   }).as('getJournals');
 });
 
+// Custom command to mock appointments
 Cypress.Commands.add('mockAppointments', (appointments = []) => {
   const defaultAppointments = [
     {
       id: 'appointment-1',
-      therapistId: 'therapist-123',
-      therapistName: 'Dr. Sarah Smith',
-      patientId: 'patient-123',
+      therapistKeycloakId: 'therapist-kc-123',
+      patientKeycloakId: 'patient-kc-123',
       startTime: '2025-12-01T10:00:00',
       endTime: '2025-12-01T11:00:00',
       status: 'CONFIRMED'
     }
   ];
 
-  cy.intercept('GET', '**/api/scheduling/appointments/my-appointments', {
+  cy.intercept('GET', '**/api/appointments/user', {
     statusCode: 200,
     body: appointments.length > 0 ? appointments : defaultAppointments
-  }).as('getMyAppointments');
+  }).as('getUserAppointments');
 });
 
+// Custom command to create a journal entry
 Cypress.Commands.add('createJournal', (content, mood = 'NEUTRAL') => {
   cy.intercept('POST', '**/api/journals', {
     statusCode: 201,
@@ -126,15 +102,61 @@ Cypress.Commands.add('createJournal', (content, mood = 'NEUTRAL') => {
   }).as('createJournal');
 
   cy.visit('/journals/create');
-  cy.get('textarea').type(content);
+  cy.get('textarea[name="content"]').type(content);
   if (mood !== 'NEUTRAL') {
-    cy.get(`select[name="mood"]`).select(mood);
+    cy.get('select[name="mood"]').select(mood);
   }
   cy.contains('button', 'Save').click();
   cy.wait('@createJournal');
 });
 
-// Command to check if an element is visible in viewport
+// Custom command to create an appointment slot (therapist)
+Cypress.Commands.add('createAppointmentSlot', (date, startTime, endTime, notes = '') => {
+  cy.intercept('POST', '**/api/appointments', {
+    statusCode: 201,
+    body: {
+      id: `slot-${Date.now()}`,
+      therapistKeycloakId: 'therapist-kc-123',
+      startTime: `${date}T${startTime}:00`,
+      endTime: `${date}T${endTime}:00`,
+      status: 'AVAILABLE',
+      notes: notes
+    }
+  }).as('createSlot');
+
+  cy.visit('/create-appointment-slot');
+  cy.get('input[type="date"]').type(date);
+  cy.get('input[type="time"]').first().type(startTime);
+  cy.get('input[type="time"]').last().type(endTime);
+  if (notes) {
+    cy.get('textarea').type(notes);
+  }
+  cy.contains('button', 'Create Slot').click();
+  cy.wait('@createSlot');
+});
+
+// Custom command to book an appointment (patient)
+Cypress.Commands.add('bookAppointment', (slotId, notes = '') => {
+  cy.intercept('POST', `**/api/appointments/${slotId}/book`, {
+    statusCode: 200,
+    body: {
+      id: `appointment-${Date.now()}`,
+      appointmentId: slotId,
+      patientKeycloakId: 'patient-kc-123',
+      therapistKeycloakId: 'therapist-kc-123',
+      status: 'CONFIRMED',
+      notes: notes
+    }
+  }).as('bookAppointment');
+
+  if (notes) {
+    cy.get('textarea[placeholder*="notes"]').type(notes);
+  }
+  cy.contains('button', 'Book Appointment').click();
+  cy.wait('@bookAppointment');
+});
+
+// Command to check if element is visible in viewport
 Cypress.Commands.add('isInViewport', { prevSubject: true }, (subject) => {
   const rect = subject[0].getBoundingClientRect();
   
@@ -144,4 +166,37 @@ Cypress.Commands.add('isInViewport', { prevSubject: true }, (subject) => {
   expect(rect.right).to.be.lessThan(window.innerWidth);
   
   return subject;
+});
+
+// Global beforeEach to set up common intercepts
+beforeEach(() => {
+  // Intercept health checks or common API calls
+  cy.intercept('GET', '**/health', { statusCode: 200 }).as('healthCheck');
+  
+  // Intercept Keycloak configuration if needed
+  cy.intercept('GET', '**/keycloak.json', {
+    statusCode: 200,
+    body: {
+      realm: 'openleaf',
+      'auth-server-url': 'http://localhost:8080/auth/',
+      'ssl-required': 'external',
+      resource: 'openleaf-frontend',
+      'public-client': true,
+      'confidential-port': 0
+    }
+  }).as('getKeycloakConfig');
+});
+
+// Handle uncaught exceptions
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Ignore ResizeObserver errors which can occur in some browsers
+  if (err.message.includes('ResizeObserver')) {
+    return false;
+  }
+  // Ignore Keycloak related errors in tests
+  if (err.message.includes('keycloak')) {
+    return false;
+  }
+  // Let other errors fail the test
+  return true;
 });

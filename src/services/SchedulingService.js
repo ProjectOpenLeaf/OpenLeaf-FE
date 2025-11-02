@@ -89,18 +89,6 @@ export const getUserAppointments = async () => {
   return response.data;
 };
 
-export const getPatientTherapist = async (patientKeycloakId) => {
-  const response = await axios.get(
-    `${API_BASE_URL}/patient/${patientKeycloakId}/therapist`,
-    {
-      headers: {
-        'Authorization': `Bearer ${keycloak.token}`
-      }
-    }
-  );
-  
-  return response.data;
-};
 
 const schedulingService = {
   createAppointmentSlot,
@@ -108,7 +96,6 @@ const schedulingService = {
   bookAppointment,
   cancelAppointment,
   getUserAppointments,
-  getPatientTherapist
 };
 
 export default schedulingService;
