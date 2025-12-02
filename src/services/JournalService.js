@@ -1,7 +1,7 @@
 import axios from 'axios';
 import keycloak from '../components/keycloak.js';
 
-const API_BASE_URL = 'http://localhost:8081/api/journals';
+const API_BASE_URL = 'https://localhost:8443/api/journals';
 
 export const createJournal = async (content) => {
   const response = await axios.post(

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import keycloak from '../components/keycloak.js';
 
-const API_BASE_URL = 'http://localhost:8081/api/assignments';
+const API_BASE_URL = 'https://localhost:8443/api/assignments';
 
 /**
  * Assign a therapist to a patient (Admin only)

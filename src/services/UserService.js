@@ -1,7 +1,7 @@
 import axios from 'axios';
 import keycloak from '../components/keycloak.js'
 
-const API_BASE_URL = 'http://localhost:8081/api/users';
+const API_BASE_URL = 'https://localhost:8443/api/users';
 
 /**
  * Register user in the backend database
