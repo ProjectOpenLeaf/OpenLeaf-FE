@@ -374,6 +374,7 @@ jobs:
           wait-on: 'http://localhost:4173'
           wait-on-timeout: 120
           browser: chrome
+        config: baseUrl=http://localhost:4173  # Add this
         continue-on-error: true
 
       - name: Upload Cypress screenshots
