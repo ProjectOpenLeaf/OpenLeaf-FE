@@ -22,11 +22,14 @@ RUN npm run build
 # ============================================
 FROM nginx:alpine
 
+# Build argument to select nginx config (default: nginx.prod.conf)
+ARG NGINX_CONFIG=nginx.prod.conf
+
 # Remove default nginx config
 RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/
+# Copy selected nginx configuration
+COPY ${NGINX_CONFIG} /etc/nginx/conf.d/nginx.conf
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html

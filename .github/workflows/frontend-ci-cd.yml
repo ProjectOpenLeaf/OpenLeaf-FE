@@ -151,6 +151,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NGINX_CONFIG=nginx.prod.conf
 
       - name: Image published summary
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -237,7 +239,12 @@ jobs:
       # ========================================
       - name: Build and start frontend container
         run: |
-          docker build -t frontend-test:latest .
+          # Build test image with test nginx config (no api-gateway dependency)
+          docker build \
+            --build-arg NGINX_CONFIG=nginx.test.conf \
+            -t frontend-test:latest .
+          
+          # Start container
           docker run -d -p 8080:80 --name frontend-container frontend-test:latest
           
           echo "Waiting for frontend to be ready..."
