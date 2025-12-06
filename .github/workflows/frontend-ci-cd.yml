@@ -152,7 +152,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            NGINX_CONFIG=nginx.prod.conf
+            NGINX_CONFIG=nginx-prod.conf
 
       - name: Image published summary
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
