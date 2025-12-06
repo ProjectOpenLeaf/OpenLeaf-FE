@@ -241,7 +241,7 @@ jobs:
         run: |
           # Build test image with test nginx config (no api-gateway dependency)
           docker build \
-            --build-arg NGINX_CONFIG=nginx.test.conf \
+            --build-arg NGINX_CONFIG=nginx-test.conf \
             -t frontend-test:latest .
           
           # Start container
