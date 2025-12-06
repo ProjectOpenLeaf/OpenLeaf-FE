@@ -23,7 +23,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Build argument to select nginx config (default: nginx.prod.conf)
-ARG NGINX_CONFIG=nginx.prod.conf
+ARG NGINX_CONFIG=nginx-prod.conf
 
 # Remove default nginx config
 RUN rm /etc/nginx/conf.d/default.conf
